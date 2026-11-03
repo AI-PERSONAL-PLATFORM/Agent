@@ -34,5 +34,4 @@ Set `LOGFIRE_TOKEN` in `.env` to enable optional agent tracing.
 
 ## Service documentation
 
-- [Backend schema](backend-schema.md): planned database tables and HTTP contract, kept for reference.
 - [Agents](agents/README.md): models, tools, tests, and Logfire setup.
