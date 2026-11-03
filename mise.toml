@@ -1,0 +1,74 @@
+[tools]
+node = "22"
+python = "3.13"
+uv = "latest"
+gh = "latest"
+
+[settings]
+task.run_auto_install = false
+
+[settings.status]
+show_tools = true
+
+[tasks.setup]
+description = "Install shared tools and all application dependencies"
+run = [
+  "mise install",
+  "mise trust agents/mise.toml",
+  "mise -C agents run setup",
+]
+
+[tasks.install-hooks]
+description = "Install the commit-message Git hook"
+run = 'mise x -- uvx pre-commit install --hook-type commit-msg'
+
+[tasks.create-issue]
+description = "Create a GitHub issue from a repository template"
+run = "bash scripts/create_issue.sh"
+
+[tasks.create-issue-branch]
+description = "Create and check out a branch linked to an issue"
+run = "bash scripts/create_issue_branch.sh"
+
+[tasks.create-pr]
+description = "Create a pull request from the repository template"
+run = "bash scripts/create_pr.sh"
+
+[tasks.install-gh-stack]
+description = "Install GitHub's stacked pull request extension"
+run = "gh extension install github/gh-stack"
+
+[tasks.create-stack]
+description = "Choose a GitHub stacked pull request action"
+run = "bash scripts/create_stack.sh"
+
+[tasks.dev]
+description = "Build and start the Docker development stack"
+run = "docker compose up --build -d"
+
+[tasks.down]
+description = "Stop the Docker stack and keep its volumes"
+run = "docker compose down"
+
+[tasks.ps]
+description = "Show Docker service status"
+run = "docker compose ps"
+
+[tasks.web-ui]
+description = "Serve the optional Pydantic AI chat UI for the assistant at http://127.0.0.1:8001"
+dir = "{{config_root}}"
+run = "mise -C agents run web-ui"
+
+[tasks.clean-cache]
+description = "Remove application caches and the root Ruff cache"
+dir = "{{config_root}}"
+run = [
+  "mise -C agents run clean-cache",
+  "mise x -- python -c 'from pathlib import Path; import shutil; [shutil.rmtree(p) for p in [Path(\".ruff_cache\")] if p.exists()]'",
+]
+
+[tasks.clean-deps]
+description = "Remove installed dependencies from all applications"
+run = [
+  "mise -C agents run clean-deps",
+]

@@ -1,0 +1,35 @@
+name: Agents
+
+on:
+  pull_request:
+    paths:
+      - "agents/**"
+      - "mise.toml"
+      - ".github/workflows/agents.yml"
+      - ".github/workflows/scripts/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
+        with:
+          install_args: python uv
+      - name: Install agents dependencies
+        run: mise x -- uv sync --directory agents --frozen --dev
+      - name: Check model credentials
+        run: |
+          if [[ -z "$OPENCODE_API_KEY" ]]; then
+            echo "::error::Set the OPENCODE_API_KEY repository secret to run the real agent API test."
+            exit 1
+          fi
+      - name: Send a message to the real agent and verify its reply
+        run: mise x -- uv run --project agents --env-file agents/.env.example --frozen bash .github/workflows/scripts/test_agents.sh

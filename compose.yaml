@@ -1,0 +1,39 @@
+name: ai-agent-platform
+
+services:
+  agents:
+    build: ./agents
+    environment:
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      MODEL_PROVIDER: ${MODEL_PROVIDER:-}
+      AGENT_MODEL: ${AGENT_MODEL:-}
+      OPENCODE_API_KEY: ${OPENCODE_API_KEY:-}
+      OPENCODE_BASE_URL: ${OPENCODE_BASE_URL:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-}
+      AGENT_REQUEST_LIMIT: ${AGENT_REQUEST_LIMIT:-}
+      AGENT_TOTAL_TOKENS_LIMIT: ${AGENT_TOTAL_TOKENS_LIMIT:-}
+      LOGFIRE_TOKEN: ${LOGFIRE_TOKEN:-}
+      LOGFIRE_SERVICE_NAME: ${LOGFIRE_SERVICE_NAME:-}
+      LOGFIRE_ENVIRONMENT: ${LOGFIRE_ENVIRONMENT:-}
+      LOGFIRE_INCLUDE_CONTENT: ${LOGFIRE_INCLUDE_CONTENT:-}
+      HEALTHCHECK_URL: ${AGENTS_HEALTHCHECK_URL:?Set AGENTS_HEALTHCHECK_URL in .env}
+    ports:
+      - "${AGENTS_PORT:-8000}:8000"
+    volumes:
+      - ./agents:/app
+      - agents_venv:/opt/venv
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import os, urllib.request; urllib.request.urlopen(os.environ['HEALTHCHECK_URL'], timeout=2)
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    stop_grace_period: 15s
+
+volumes:
+  agents_venv:

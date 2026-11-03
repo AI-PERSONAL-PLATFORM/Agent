@@ -1,0 +1,50 @@
+import os
+from collections.abc import Iterator
+from uuid import uuid4
+
+import httpx
+import pytest
+from ag_ui.core import RunAgentInput, UserMessage
+from fastapi.testclient import TestClient
+from pydantic_ai.models.test import TestModel
+
+from app.agents import assistant
+from app.agents.base import agent as base_agent
+from app.main import app
+
+
+@pytest.fixture
+def run_input() -> RunAgentInput:
+    return RunAgentInput(
+        thread_id=str(uuid4()),
+        run_id=str(uuid4()),
+        state={},
+        messages=[UserMessage(id=str(uuid4()), content="Say hello in one short sentence.")],
+        tools=[],
+        context=[],
+        forwarded_props={},
+    )
+
+
+@pytest.fixture
+def test_agents(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Build cached agents on TestModel; tests override the model they exercise."""
+    monkeypatch.setattr(base_agent, "get_agent_model", TestModel)
+    assistant.get_assistant_agent.cache_clear()
+    yield
+    assistant.get_assistant_agent.cache_clear()
+
+
+@pytest.fixture
+def api_client() -> Iterator[TestClient]:
+    with TestClient(app) as client:
+        yield client
+
+
+@pytest.fixture
+def agent_api_client() -> Iterator[httpx.Client]:
+    base_url = os.environ.get("AGENT_API_URL")
+    if not base_url:
+        pytest.skip("Set AGENT_API_URL to test the running agents service and real model provider.")
+    with httpx.Client(base_url=base_url, timeout=120) as client:
+        yield client

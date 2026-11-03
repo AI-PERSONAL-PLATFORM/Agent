@@ -1,0 +1,72 @@
+# Application tasks inherit tool versions from the root mise.toml.
+
+[tasks.setup]
+description = "Install agents dependencies"
+dir = "{{config_root}}"
+run = [
+  'mise x -- uv venv --clear',
+  'mise x -- uv sync --dev',
+]
+
+[tasks.dev]
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+[tasks.web-ui]
+description = "Serve the Pydantic AI chat UI for the assistant on port 8001 (optional, see src/app/web_ui.py)"
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen uvicorn app.web_ui:app --app-dir src --env-file ../.env --host 127.0.0.1 --port 8001"
+
+[tasks.lint]
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen ruff check src tests"
+
+[tasks.lint-fix]
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen ruff check --fix src tests"
+
+[tasks.format]
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen ruff format src tests"
+
+[tasks.format-check]
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen ruff format --check src tests"
+
+[tasks.typecheck]
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen mypy src"
+
+[tasks.test]
+dir = "{{config_root}}"
+run = "mise x -- uv run --frozen pytest"
+
+[tasks.test-agent]
+dir = "{{config_root}}"
+run = "AGENT_API_URL=\"${AGENT_API_URL:?Set AGENT_API_URL to the running agents service URL}\" mise x -- uv run --frozen pytest tests/api/test_agent_api.py -v -s"
+
+[tasks.clean-cache]
+dir = "{{config_root}}"
+run = "mise x -- python -c 'from pathlib import Path; import shutil; paths=[Path(\".pytest_cache\"), Path(\".mypy_cache\"), Path(\".ruff_cache\")]; paths.extend(p for root in (Path(\"src\"), Path(\"tests\")) for p in root.rglob(\"__pycache__\")); [shutil.rmtree(p) for p in paths if p.exists()]' "
+
+[tasks.clean-deps]
+dir = "{{config_root}}"
+run = "mise x -- python -c 'from pathlib import Path; import shutil; p=Path(\".venv\"); shutil.rmtree(p) if p.exists() else None' "
+
+[tasks.check]
+dir = "{{config_root}}"
+run = [
+  'mise run lint',
+  'mise run format-check',
+  'mise run typecheck',
+  'mise run test',
+]
+
+[tasks.logs]
+dir = "{{config_root}}"
+run = "docker compose -f ../compose.yaml logs -f agents"
+
+[tasks.shell]
+dir = "{{config_root}}"
+run = "docker compose -f ../compose.yaml exec agents sh"
+

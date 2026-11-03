@@ -1,0 +1,23 @@
+name: Feature request (form)
+description: The request proposes a feature or improvement for the agents service.
+title: "feat: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Goal
+      description: The desired outcome.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Plan
+      description: The proposed implementation or next step, such as a new agent, tool, prompt, route, or setting.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: The outcomes that define completion, including the tests that should cover them.
