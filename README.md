@@ -1,6 +1,6 @@
 # AI Personal Platform
 
-A personal AI platform with agent chat, saved conversations, attachments, and configurable tools. Built with FastAPI/Pydantic AI.
+A personal AI platform with agent chat and configurable tools. Built with FastAPI/Pydantic AI.
 
 Built using my own knowledge and AI assistance for code, design, and documentation.
 

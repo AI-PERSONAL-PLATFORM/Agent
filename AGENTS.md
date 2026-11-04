@@ -8,7 +8,7 @@
   - `agents/skills/` holds Agent Skills as `<name>/SKILL.md`. Each agent must pass `skills=`: `"all"`, a list of skill names, or `[]` for none. `BaseAgent` offers them through the `Skills` capability from `pydantic-ai-harness` (kept as `agent.skills`, with an `ArtifactScanner` that leaves out skills that look like prompt injection), and the model loads one with `load_capability`. `GET /agents/{agent_id}/skills` lists them through `Skills.load()`.
   - The summarize tool is a single direct model request, not a sub-agent; if a real sub-agent is added later, use Pydantic AI agent delegation via a tool that calls `child.run(..., deps=ctx.deps, usage=ctx.usage)`.
   - Add an agent by creating a module in `agents/` and an entry in the `AGENTS` registry in `agents/__init__.py`. Avoid abstractions that serve a single agent.
-- The agents service does not call a backend. `backend-schema.md` records a planned database schema and HTTP contract for reference only.
+- The agents service does not call a backend.
 - Root `compose.yaml`, `mise.toml`, `.env.example`, and `README.md` coordinate development. Preserve official scaffold output unless integration requires a change.
 - GitHub Actions workflows in `.github/workflows/` and their shell scripts in `.github/workflows/scripts/`. The `Agents` workflow calls `test_agents.sh` to start Uvicorn, wait for health, run the live API test, and stop the server.
 
@@ -22,7 +22,7 @@
 ### Setup
 
 - `mise trust` and `mise install` enable the versions declared in `mise.toml`; run once.
-- `mise setup` installs tools, trusts the application configs, and invokes their setup tasks.
+- `mise setup` installs the tools and the Python dependencies.
 
 ### Task layout
 
@@ -47,13 +47,12 @@
 
 ### Tool selection
 
-- Mise selects Node.js, Python, uv, and GitHub CLI from `mise.toml` while working in this repository. Use `mise x -- <command>` for direct tool commands, or enable shell activation to put the selected tools on `PATH` automatically when entering the repository.
+- Mise selects Python, uv, and GitHub CLI from `mise.toml` while working in this repository. Use `mise x -- <command>` for direct tool commands, or enable shell activation to put the selected tools on `PATH` automatically when entering the repository.
 
 ## Coding Style & Naming Conventions
 
-- Use strict TypeScript, PascalCase React components, and camelCase functions and values.
 - Python uses Ruff, four-space indentation, snake_case names, and type annotations for application interfaces.
-- Keep modules focused and configuration environment-based; use `@/*` imports where appropriate.
+- Keep modules focused and configuration environment-based.
 
 ## Testing Guidelines
 
@@ -72,9 +71,9 @@
 ## Security & Configuration
 
 - Copy `.env.example` for local configuration; never commit real environment files or credentials.
-- Keep internal URLs and database credentials server-side.
-- Keep runtime URLs in environment configuration and example values in `.env.example` files.
+- Keep internal URLs and credentials server-side.
+- Keep runtime URLs in environment configuration and example values in `.env.example`.
 - Agent requests require `OPENCODE_API_KEY` and `OPENCODE_BASE_URL` when `MODEL_PROVIDER=opencode`, or `OLLAMA_BASE_URL` when `MODEL_PROVIDER=ollama`.
 - Compose reads service and container health-check URLs from the root environment; do not embed URL fallbacks in application code or Compose.
-- Non-secret defaults, such as `AGENT_MODEL`, live only in `Settings` (`agents/src/app/core/config.py`). Compose passes `${VAR:-}` and `.env.example` files leave them empty; `Settings` ignores empty values, so they fall back to its defaults.
+- Non-secret defaults, such as `AGENT_MODEL`, live only in `Settings` (`agents/src/app/core/config.py`). Compose passes `${VAR:-}` and `.env.example` leaves them empty; `Settings` ignores empty values, so they fall back to its defaults.
 - Every API run uses `Settings.usage_limits`, set by `AGENT_REQUEST_LIMIT` and `AGENT_TOTAL_TOKENS_LIMIT`; a run that exceeds them streams an `error` chunk.

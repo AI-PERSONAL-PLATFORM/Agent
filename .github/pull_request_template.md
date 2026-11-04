@@ -12,8 +12,8 @@
 - [ ] `mise test` passes.
 - [ ] For changes to agent behavior, `mise test-agent` passes against a real model, or the reason it was not run is noted below.
 - [ ] Agent or prompt changes keep the `AgentResponse` contract and the Vercel AI stream intact.
-- [ ] `.env.example`, `README.md`, `AGENTS.md`, and `backend-schema.md` are updated if needed.
-- [ ] No secrets, credentials, or database dependencies are added.
+- [ ] `.env.example`, `README.md`, and `AGENTS.md` are updated if needed.
+- [ ] No secrets or credentials are added.
 
 ## Related issue
 
