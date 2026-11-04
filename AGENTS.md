@@ -26,18 +26,18 @@
 
 ### Task layout
 
-- Root `mise.toml` contains shared tool versions, `setup` for installing all application dependencies, whole-stack Docker commands, aggregate cleanup tasks, and GitHub/Git workflow tasks. Keep development, quality checks, tests, database, application cleanup implementations, and application container tasks in each application's `mise.toml`.
-- Run application tasks with `mise -C <folder> run <task>` from the root, or `mise <task>` inside `agents/`. Each local config inherits tool versions and sets its own working directory.
-- Each application defines `dev`, `lint`, `format-check`, `typecheck`, `check`, `logs`, `shell`, `clean-cache`, and `clean-deps`. Agents also define `test`.
+- The single root `mise.toml` contains shared tool versions, `setup` for installing all application dependencies, Docker commands, development, quality check, test and cleanup tasks, and GitHub/Git workflow tasks. There is no per-application `mise.toml`.
+- Run every task with `mise <task>` from the root. The Python project (`pyproject.toml`, `uv.lock`, `.python-version`, `.venv`) lives at the root, and the code is in `agents/src` and `agents/tests`; tool paths in `pyproject.toml` and the mise tasks point there.
+- `mise local` builds and starts the Docker stack, and `mise dev` runs the agents service natively without Docker. The agents tasks are `lint`, `lint-fix`, `format`, `format-check`, `typecheck`, `test`, `test-agent`, `check`, `logs`, `shell`, and `web-ui`.
 
 ### Docker
 
-- Root `mise dev` builds and starts the Docker stack; `mise ps` shows status, and `mise down` stops the stack while preserving volumes.
+- Root `mise local` builds and starts the Docker stack; `mise ps` shows status, and `mise down` stops the stack while preserving volumes.
 - `docker compose config` validates Compose configuration, and `docker compose up --build` builds and starts all services. Rebuild containers after dependency or Dockerfile changes.
 
 ### Cleanup
 
-- Root `mise clean-cache` and `mise clean-deps` delegate to both application configs. Root `clean-cache` also removes the root `.ruff_cache/`, preserving installed dependencies and global package caches. Local `clean-cache` tasks preserve dependencies; `clean-deps` removes only the owning application's dependency directory. Root `mise setup` reinstalls all application dependencies.
+- `mise clean-cache` removes the application caches and the root `.ruff_cache/`, preserving installed dependencies and global package caches. `mise clean-deps` removes the application's dependency directory. `mise setup` reinstalls all application dependencies.
 
 ### GitHub and Git workflows
 
@@ -59,7 +59,7 @@
 
 - Add agents service tests under `agents/tests/` with names such as `test_health.py`; test HTTP endpoints with the configured `httpx` client.
 - Run relevant tests and lint/type checks before proposing changes; report only checks actually run.
-- Live API test (`agents/tests/api/test_agent_api.py`): test through the real HTTP endpoint and configured model provider; do not replace it with a mocked agent or `TestModel`. Send a complete Vercel AI `submit-message` payload and verify a `start` chunk, streamed `text-delta` JSON validated with `AgentResponse.model_validate_json`, a nonempty `message`, a final `finish` chunk with `finishReason` `stop`, and no `error` chunks. Use separate assertions for independent conditions. Ordinary pytest runs skip this test when `AGENT_API_URL` is unset; `mise -C agents run test-agent` requires an explicitly exported target and sends one real model request.
+- Live API test (`agents/tests/api/test_agent_api.py`): test through the real HTTP endpoint and configured model provider; do not replace it with a mocked agent or `TestModel`. Send a complete Vercel AI `submit-message` payload and verify a `start` chunk, streamed `text-delta` JSON validated with `AgentResponse.model_validate_json`, a nonempty `message`, a final `finish` chunk with `finishReason` `stop`, and no `error` chunks. Use separate assertions for independent conditions. Ordinary pytest runs skip this test when `AGENT_API_URL` is unset; `mise test-agent` requires an explicitly exported target and sends one real model request.
 - The `Agents` workflow runs on relevant pull requests and manual dispatches, with no push trigger on `main`. It requires the `OPENCODE_API_KEY` repository secret and fails clearly when it is unavailable. Keep token permissions read-only and do not use `pull_request_target` to expose secrets to fork code.
 - Distinguish local test results, skipped live tests, and workflow runs actually executed by GitHub Actions.
 

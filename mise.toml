@@ -11,11 +11,11 @@ task.run_auto_install = false
 show_tools = true
 
 [tasks.setup]
-description = "Install shared tools and all application dependencies"
+description = "Install tools and application dependencies"
 run = [
   "mise install",
-  "mise trust agents/mise.toml",
-  "mise -C agents run setup",
+  "mise x -- uv venv --clear",
+  "mise x -- uv sync --dev",
 ]
 
 [tasks.install-hooks]
@@ -42,7 +42,7 @@ run = "gh extension install github/gh-stack"
 description = "Choose a GitHub stacked pull request action"
 run = "bash scripts/create_stack.sh"
 
-[tasks.dev]
+[tasks.local]
 description = "Build and start the Docker development stack"
 run = "docker compose up --build -d"
 
@@ -54,21 +54,55 @@ run = "docker compose down"
 description = "Show Docker service status"
 run = "docker compose ps"
 
+[tasks.dev]
+description = "Run the agents service natively without Docker at http://127.0.0.1:8000, loading the root .env"
+run = "CORS_ORIGINS=\"${CORS_ORIGINS:-http://localhost:3000,tauri://localhost}\" mise x -- uv run --frozen uvicorn app.main:app --env-file .env --host 127.0.0.1 --port 8000 --reload"
+
 [tasks.web-ui]
-description = "Serve the optional Pydantic AI chat UI for the assistant at http://127.0.0.1:8001"
-dir = "{{config_root}}"
-run = "mise -C agents run web-ui"
+description = "Serve the optional Pydantic AI chat UI for the assistant on port 8001 (see agents/src/app/web_ui.py)"
+run = "mise x -- uv run --frozen uvicorn app.web_ui:app --app-dir agents/src --env-file .env --host 127.0.0.1 --port 8001"
+
+[tasks.lint]
+run = "mise x -- uv run --frozen ruff check agents/src agents/tests"
+
+[tasks.lint-fix]
+run = "mise x -- uv run --frozen ruff check --fix agents/src agents/tests"
+
+[tasks.format]
+run = "mise x -- uv run --frozen ruff format agents/src agents/tests"
+
+[tasks.format-check]
+run = "mise x -- uv run --frozen ruff format --check agents/src agents/tests"
+
+[tasks.typecheck]
+run = "mise x -- uv run --frozen mypy agents/src"
+
+[tasks.test]
+run = "mise x -- uv run --frozen pytest"
+
+[tasks.test-agent]
+run = "AGENT_API_URL=\"${AGENT_API_URL:?Set AGENT_API_URL to the running agents service URL}\" mise x -- uv run --frozen pytest agents/tests/api/test_agent_api.py -v -s"
+
+[tasks.check]
+run = [
+  'mise run lint',
+  'mise run format-check',
+  'mise run typecheck',
+  'mise run test',
+]
+
+[tasks.logs]
+description = "Follow the agents container logs"
+run = "docker compose logs -f agents"
+
+[tasks.shell]
+description = "Open a shell in the agents container"
+run = "docker compose exec agents sh"
 
 [tasks.clean-cache]
-description = "Remove application caches and the root Ruff cache"
-dir = "{{config_root}}"
-run = [
-  "mise -C agents run clean-cache",
-  "mise x -- python -c 'from pathlib import Path; import shutil; [shutil.rmtree(p) for p in [Path(\".ruff_cache\")] if p.exists()]'",
-]
+description = "Remove Python tool caches, keeping installed dependencies"
+run = "mise x -- python -c 'from pathlib import Path; import shutil; paths=[Path(p) for p in (\".pytest_cache\", \".mypy_cache\", \".ruff_cache\")]; paths.extend(p for root in (Path(\"agents/src\"), Path(\"agents/tests\")) for p in root.rglob(\"__pycache__\")); [shutil.rmtree(p) for p in paths if p.exists()]'"
 
 [tasks.clean-deps]
-description = "Remove installed dependencies from all applications"
-run = [
-  "mise -C agents run clean-deps",
-]
+description = "Remove the installed Python dependencies"
+run = "mise x -- python -c 'from pathlib import Path; import shutil; p=Path(\".venv\"); shutil.rmtree(p) if p.exists() else None'"

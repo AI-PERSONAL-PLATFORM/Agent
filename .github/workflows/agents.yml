@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "agents/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".python-version"
       - "mise.toml"
       - ".github/workflows/agents.yml"
       - ".github/workflows/scripts/**"
@@ -24,7 +27,7 @@ jobs:
         with:
           install_args: python uv
       - name: Install agents dependencies
-        run: mise x -- uv sync --directory agents --frozen --dev
+        run: mise x -- uv sync --frozen --dev
       - name: Check model credentials
         run: |
           if [[ -z "$OPENCODE_API_KEY" ]]; then
@@ -32,4 +35,4 @@ jobs:
             exit 1
           fi
       - name: Send a message to the real agent and verify its reply
-        run: mise x -- uv run --project agents --env-file agents/.env.example --frozen bash .github/workflows/scripts/test_agents.sh
+        run: mise x -- uv run --env-file agents/.env.example --frozen bash .github/workflows/scripts/test_agents.sh

@@ -32,11 +32,12 @@ package = true
 
 [tool.uv.build-backend]
 module-name = "app"
-module-root = "src"
+module-root = "agents/src"
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+src = ["agents/src", "agents"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
@@ -44,15 +45,15 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-mypy_path = "src"
+mypy_path = "agents/src"
 packages = ["app"]
 
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.13"
-extraPaths = ["src", "."]
+extraPaths = ["agents/src", "agents"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["agents/tests"]
 asyncio_mode = "auto"

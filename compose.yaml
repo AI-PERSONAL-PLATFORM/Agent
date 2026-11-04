@@ -2,7 +2,9 @@ name: ai-agent-platform
 
 services:
   agents:
-    build: ./agents
+    build:
+      context: .
+      dockerfile: agents/Dockerfile
     environment:
       CORS_ORIGINS: ${CORS_ORIGINS:-}
       MODEL_PROVIDER: ${MODEL_PROVIDER:-}
@@ -20,7 +22,7 @@ services:
     ports:
       - "${AGENTS_PORT:-8000}:8000"
     volumes:
-      - ./agents:/app
+      - ./agents:/app/agents
       - agents_venv:/opt/venv
     healthcheck:
       test:

@@ -9,8 +9,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --locked --dev --no-install-project
 
-COPY src ./src
-COPY tests ./tests
+COPY agents/src ./agents/src
+COPY agents/tests ./agents/tests
 RUN uv sync --locked --dev
 EXPOSE 8000
-CMD ["uv", "run", "--no-sync", "python", "-m", "uvicorn", "app.main:app", "--app-dir", "src", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uv", "run", "--no-sync", "python", "-m", "uvicorn", "app.main:app", "--app-dir", "agents/src", "--host", "0.0.0.0", "--port", "8000", "--reload"]

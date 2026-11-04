@@ -1,6 +1,6 @@
 {
   "include": ["agents/src", "agents/tests"],
-  "venvPath": "agents",
+  "venvPath": ".",
   "venv": ".venv",
   "pythonVersion": "3.13",
   "extraPaths": ["agents/src", "agents"]

@@ -1,9 +1,9 @@
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import SecretStr
+from pydantic import SecretStr, field_validator
 from pydantic_ai import UsageLimits
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -11,6 +11,7 @@ class Settings(BaseSettings):
         case_sensitive=False, env_file=".env", env_ignore_empty=True, extra="ignore"
     )
 
+    cors_origins: Annotated[list[str], NoDecode] = []
     model_provider: Literal["opencode", "ollama"] = "opencode"
     agent_model: str = "gpt-6-luna"
     agent_request_limit: int = 20
@@ -22,6 +23,13 @@ class Settings(BaseSettings):
     logfire_service_name: str = "agents"
     logfire_environment: str = "development"
     logfire_include_content: bool = False
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def split_cors_origins(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
+        return value
 
     @property
     def usage_limits(self) -> UsageLimits:

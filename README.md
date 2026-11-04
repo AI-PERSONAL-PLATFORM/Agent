@@ -13,11 +13,10 @@ cp .env.example .env
 mise trust
 mise install
 ```
-workspace
 Set `OPENCODE_API_KEY` in `.env`. The example already provides the URLs needed for Docker.
 
 ```bash
-mise dev
+mise local
 ```
 
 Set `LOGFIRE_TOKEN` in `.env` to enable optional agent tracing.
@@ -26,11 +25,12 @@ Set `LOGFIRE_TOKEN` in `.env` to enable optional agent tracing.
 
 | Command | Purpose |
 | --- | --- |
-| `mise dev` | Build and start the stack |
+| `mise local` | Build and start the Docker stack |
 | `mise ps` | Show service status |
 | `docker compose down` | Stop the stack and keep database data |
 | `mise setup` | Install dependencies for native development and checks |
-| `mise -C <folder> run check` | Run checks in `agents` |
+| `mise dev` | Run the agents service local |
+| `mise check` | Run lint, format check, typecheck, and tests |
 
 ## Service documentation
 

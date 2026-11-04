@@ -10,7 +10,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-mise x -- uv run --directory agents --frozen uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+mise x -- uv run --frozen uvicorn app.main:app --host 127.0.0.1 --port 8000 &
 server_pid=$!
 
 for attempt in {1..30}; do
@@ -24,4 +24,4 @@ for attempt in {1..30}; do
   sleep 1
 done
 curl --silent --show-error --fail --max-time 2 "$AGENT_API_URL/health"
-mise -C agents run test-agent
+mise run test-agent

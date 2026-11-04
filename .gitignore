@@ -7,6 +7,10 @@
 !**/.env.example
 
 # Python / uv
+build/
+dist/
+wheels/
+*.egg-info
 .venv/
 **/.venv/
 __pycache__/
