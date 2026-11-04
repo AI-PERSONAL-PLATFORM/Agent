@@ -3,4 +3,4 @@
 from app.agents.assistant import get_assistant_agent
 from app.agents.base import AgentDeps
 
-app = get_assistant_agent().to_web(deps=AgentDeps(session_id="web-ui"))
+app = get_assistant_agent().to_web(deps=AgentDeps(chat_id="web-ui"))

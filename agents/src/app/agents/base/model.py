@@ -14,7 +14,7 @@ from app.core.config import get_settings
 class AgentDeps:
     """Run dependencies shared with tools and forwarded to every subagent run."""
 
-    session_id: str
+    chat_id: str
 
 
 def agent_model_settings(ctx: RunContext[AgentDeps]) -> ModelSettings:
@@ -22,7 +22,7 @@ def agent_model_settings(ctx: RunContext[AgentDeps]) -> ModelSettings:
     return {
         "extra_headers": {
             "User-Agent": "ai-agent-platform/0.1.0",
-            "x-opencode-session": ctx.deps.session_id,
+            "x-opencode-session": ctx.deps.chat_id,
         }
     }
 

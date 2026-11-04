@@ -59,6 +59,6 @@ async def run_agent(agent: AgentDep, request: Request) -> Response:
     if not chat_id:
         raise HTTPException(status_code=422, detail="id must not be empty.")
 
-    deps = AgentDeps(session_id=chat_id)
+    deps = AgentDeps(chat_id=chat_id)
     stream = adapter.run_stream(deps=deps, usage_limits=settings.usage_limits)
     return adapter.streaming_response(stream)
