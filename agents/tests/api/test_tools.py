@@ -5,16 +5,16 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 
 import pytest
-from ag_ui.core import RunAgentInput
 from fastapi.testclient import TestClient
 from pydantic_ai.messages import ModelMessage
 from pydantic_ai.models.function import AgentInfo, FunctionModel
+from pydantic_ai.ui.vercel_ai.request_types import SubmitMessage
 
 from app.agents import assistant
 from app.agents.base import agent as base_agent
 from app.api.routes import agent as agent_routes
 from app.core.config import Settings
-from tests.helpers.agent_api import assert_agent_reply
+from tests.helpers.agent_api import assert_agent_reply, parse_events
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def test_catalog_comes_from_the_agent(api_client: TestClient, configured_tools: 
 def test_run_offers_the_agent_tools(
     api_client: TestClient,
     configured_tools: None,
-    run_input: RunAgentInput,
+    run_input: SubmitMessage,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     async def model(messages: list[ModelMessage], info: AgentInfo) -> AsyncIterator[str]:
@@ -46,15 +46,12 @@ def test_run_offers_the_agent_tools(
     monkeypatch.setattr(base_agent, "get_agent_model", lambda: FunctionModel(stream_function=model))
 
     response = api_client.post(
-        "/agents/assistant", json=run_input.model_dump(mode="json", by_alias=True)
+        "/agents/assistant",
+        json=run_input.model_dump(mode="json", by_alias=True, exclude_none=True),
     )
 
     assert response.status_code == 200
-    events = [
-        json.loads(line.removeprefix("data: "))
-        for line in response.text.splitlines()
-        if line.startswith("data: ")
-    ]
+    events = parse_events(response.text.splitlines())
     reply = assert_agent_reply(events)
     assert json.loads(reply.message) == ["summarize"]
 

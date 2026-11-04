@@ -18,7 +18,7 @@ class SummaryBudget(BaseModel):
 
 
 class Summary(BaseModel):
-    """Structured so the tool result is JSON, which AG-UI clients parse."""
+    """Structured so the tool result is JSON, which UI clients parse."""
 
     summary: str
 

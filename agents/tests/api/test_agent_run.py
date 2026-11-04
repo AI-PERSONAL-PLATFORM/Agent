@@ -1,17 +1,18 @@
-"""The agent endpoint runs the AG-UI input it receives."""
+"""The agent endpoint runs the Vercel AI input it receives."""
 
 import json
 from collections.abc import AsyncIterator
 
 import pytest
-from ag_ui.core import RunAgentInput, UserMessage
 from fastapi.testclient import TestClient
 from pydantic_ai.messages import ModelMessage, ModelRequest, ModelResponse, TextPart, UserPromptPart
 from pydantic_ai.models.function import AgentInfo, DeltaToolCall, DeltaToolCalls, FunctionModel
+from pydantic_ai.ui.vercel_ai.request_types import SubmitMessage
 
 from app.agents.base import agent as base_agent
 from app.api.routes import agent as agent_routes
 from app.core.config import Settings
+from tests.helpers.agent_api import user_message
 
 
 @pytest.fixture
@@ -23,7 +24,7 @@ def configured_agent(test_agents: None, monkeypatch: pytest.MonkeyPatch) -> None
 def test_run_sends_all_input_messages_to_the_model(
     api_client: TestClient,
     configured_agent: None,
-    run_input: RunAgentInput,
+    run_input: SubmitMessage,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     prompts: list[str] = []
@@ -37,10 +38,11 @@ def test_run_sends_all_input_messages_to_the_model(
         yield json.dumps({"message": "Hi again."})
 
     monkeypatch.setattr(base_agent, "get_agent_model", lambda: FunctionModel(stream_function=model))
-    run_input.messages = [UserMessage(id="user-1", content="Hello"), *run_input.messages]
+    run_input.messages = [user_message("Hello"), *run_input.messages]
 
     response = api_client.post(
-        "/agents/assistant", json=run_input.model_dump(mode="json", by_alias=True)
+        "/agents/assistant",
+        json=run_input.model_dump(mode="json", by_alias=True, exclude_none=True),
     )
 
     assert response.status_code == 200
@@ -48,11 +50,11 @@ def test_run_sends_all_input_messages_to_the_model(
 
 
 def test_run_rejects_non_json_requests(
-    api_client: TestClient, configured_agent: None, run_input: RunAgentInput
+    api_client: TestClient, configured_agent: None, run_input: SubmitMessage
 ) -> None:
     response = api_client.post(
         "/agents/assistant",
-        content=run_input.model_dump_json(by_alias=True),
+        content=run_input.model_dump_json(by_alias=True, exclude_none=True),
         headers={"content-type": "text/plain"},
     )
     assert response.status_code == 415
@@ -60,7 +62,7 @@ def test_run_rejects_non_json_requests(
 
 def test_run_stops_at_the_request_limit(
     api_client: TestClient,
-    run_input: RunAgentInput,
+    run_input: SubmitMessage,
     test_agents: None,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -87,11 +89,12 @@ def test_run_stops_at_the_request_limit(
     )
 
     response = api_client.post(
-        "/agents/assistant", json=run_input.model_dump(mode="json", by_alias=True)
+        "/agents/assistant",
+        json=run_input.model_dump(mode="json", by_alias=True, exclude_none=True),
     )
 
     assert response.status_code == 200
-    assert "RUN_ERROR" in response.text
+    assert '"type":"error"' in response.text
     assert "request_limit" in response.text
 
 

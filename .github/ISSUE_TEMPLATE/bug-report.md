@@ -28,4 +28,4 @@ The expected behavior.
 
 ## Notes
 
-Relevant AG-UI events, tracebacks, or logs. Remove API keys and other secrets before including logs.
+Relevant Vercel AI stream chunks, tracebacks, or logs. Remove API keys and other secrets before including logs.

@@ -1,1 +1,1 @@
-"""HTTP endpoint and AG-UI tests."""
+"""HTTP endpoint and Vercel AI stream tests."""

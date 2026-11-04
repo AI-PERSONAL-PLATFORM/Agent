@@ -59,7 +59,7 @@
 
 - Add agents service tests under `agents/tests/` with names such as `test_health.py`; test HTTP endpoints with the configured `httpx` client.
 - Run relevant tests and lint/type checks before proposing changes; report only checks actually run.
-- Live API test (`agents/tests/api/test_agent_api.py`): test through the real HTTP endpoint and configured model provider; do not replace it with a mocked agent or `TestModel`. Send a complete AG-UI payload and verify matching thread/run IDs, streamed JSON validated with `AgentResponse.model_validate_json`, a nonempty `message`, a successful `RUN_FINISHED` outcome, and no `RUN_ERROR` events. Use separate assertions for independent conditions. Ordinary pytest runs skip this test when `AGENT_API_URL` is unset; `mise -C agents run test-agent` requires an explicitly exported target and sends one real model request.
+- Live API test (`agents/tests/api/test_agent_api.py`): test through the real HTTP endpoint and configured model provider; do not replace it with a mocked agent or `TestModel`. Send a complete Vercel AI `submit-message` payload and verify a `start` chunk, streamed `text-delta` JSON validated with `AgentResponse.model_validate_json`, a nonempty `message`, a final `finish` chunk with `finishReason` `stop`, and no `error` chunks. Use separate assertions for independent conditions. Ordinary pytest runs skip this test when `AGENT_API_URL` is unset; `mise -C agents run test-agent` requires an explicitly exported target and sends one real model request.
 - The `Agents` workflow runs on relevant pull requests and manual dispatches, with no push trigger on `main`. It requires the `OPENCODE_API_KEY` repository secret and fails clearly when it is unavailable. Keep token permissions read-only and do not use `pull_request_target` to expose secrets to fork code.
 - Distinguish local test results, skipped live tests, and workflow runs actually executed by GitHub Actions.
 
@@ -77,4 +77,4 @@
 - Agent requests require `OPENCODE_API_KEY` and `OPENCODE_BASE_URL` when `MODEL_PROVIDER=opencode`, or `OLLAMA_BASE_URL` when `MODEL_PROVIDER=ollama`.
 - Compose reads service and container health-check URLs from the root environment; do not embed URL fallbacks in application code or Compose.
 - Non-secret defaults, such as `AGENT_MODEL`, live only in `Settings` (`agents/src/app/core/config.py`). Compose passes `${VAR:-}` and `.env.example` files leave them empty; `Settings` ignores empty values, so they fall back to its defaults.
-- Every API run uses `Settings.usage_limits`, set by `AGENT_REQUEST_LIMIT` and `AGENT_TOTAL_TOKENS_LIMIT`; a run that exceeds them ends with `RUN_ERROR`.
+- Every API run uses `Settings.usage_limits`, set by `AGENT_REQUEST_LIMIT` and `AGENT_TOTAL_TOKENS_LIMIT`; a run that exceeds them streams an `error` chunk.

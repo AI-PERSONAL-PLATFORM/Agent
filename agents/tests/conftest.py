@@ -4,25 +4,20 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from ag_ui.core import RunAgentInput, UserMessage
 from fastapi.testclient import TestClient
 from pydantic_ai.models.test import TestModel
+from pydantic_ai.ui.vercel_ai.request_types import SubmitMessage
 
 from app.agents import assistant
 from app.agents.base import agent as base_agent
 from app.main import app
+from tests.helpers.agent_api import user_message
 
 
 @pytest.fixture
-def run_input() -> RunAgentInput:
-    return RunAgentInput(
-        thread_id=str(uuid4()),
-        run_id=str(uuid4()),
-        state={},
-        messages=[UserMessage(id=str(uuid4()), content="Say hello in one short sentence.")],
-        tools=[],
-        context=[],
-        forwarded_props={},
+def run_input() -> SubmitMessage:
+    return SubmitMessage(
+        id=str(uuid4()), messages=[user_message("Say hello in one short sentence.")]
     )
 
 

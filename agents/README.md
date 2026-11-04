@@ -1,6 +1,6 @@
 # Agents
 
-FastAPI and Pydantic AI service using Python and uv. Runs agents over AG-UI; it is stateless and the client sends the full message history on each run.
+FastAPI and Pydantic AI service using Python and uv. Runs agents over the Vercel AI SDK UI message stream protocol (`VercelAIAdapter`, SDK v6); it is stateless and the client sends the full message history on each run.
 
 ## Quick start
 
@@ -31,7 +31,7 @@ Open <http://localhost:8000/docs> for interactive API documentation. Native exec
 | ------ | ---------------------------- | --------------------------------------- |
 | GET    | `/`                          | Redirect to the API docs at `/docs`     |
 | GET    | `/health`                    | Check process health                    |
-| POST   | `/agents/{agent_id}`         | Run an agent and stream AG-UI events    |
+| POST   | `/agents/{agent_id}`         | Run an agent and stream Vercel AI chunks |
 | GET    | `/agents/{agent_id}/tools`   | List the agent's tool catalog           |
 | GET    | `/agents/{agent_id}/skills`  | List the skills the agent offers        |
 

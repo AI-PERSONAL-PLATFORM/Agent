@@ -4,7 +4,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
-from pydantic_ai.ui.ag_ui import AGUIAdapter
+from pydantic_ai.ui.vercel_ai import VercelAIAdapter
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -48,15 +48,17 @@ async def list_skills(agent: AgentDep) -> list[AgentSkill]:
 @router.post("/agents/{agent_id}")
 async def run_agent(agent: AgentDep, request: Request) -> Response:
     try:
-        adapter = await AGUIAdapter[AgentDeps, Any].from_request(request, agent=agent)
+        adapter = await VercelAIAdapter[AgentDeps, Any].from_request(
+            request, agent=agent, sdk_version=6
+        )
     except ValidationError as error:
         return Response(
             error.json(include_input=False), status_code=422, media_type="application/json"
         )
-    run_input = adapter.run_input
-    if not run_input.thread_id:
-        raise HTTPException(status_code=422, detail="threadId must not be empty.")
+    chat_id = adapter.run_input.id
+    if not chat_id:
+        raise HTTPException(status_code=422, detail="id must not be empty.")
 
-    deps = AgentDeps(session_id=run_input.thread_id)
+    deps = AgentDeps(session_id=chat_id)
     stream = adapter.run_stream(deps=deps, usage_limits=settings.usage_limits)
     return adapter.streaming_response(stream)

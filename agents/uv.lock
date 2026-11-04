@@ -3,28 +3,15 @@ revision = 5
 requires-python = ">=3.12, <3.14"
 
 [[package]]
-name = "ag-ui-protocol"
-version = "0.1.22"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pydantic" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e8/f7/9bf788e7d3608725d022a248a58427040f4f930ab87ddb54bd29ee4d9a51/ag_ui_protocol-0.1.22.tar.gz", hash = "sha256:d21f265284a50d9fc87ad7bcbd58f737b4b16eef7b5375f13a6e925117b52046", size = 18110, upload-time = "2026-08-31T18:20:04.334Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/6c/af3d577e68c9474c99600e65b2c6283772aae187edca6f0f2f5cbd9f565a/ag_ui_protocol-0.1.22-py3-none-any.whl", hash = "sha256:fca13ee7820f8f53e869c19e09ddd75826c1799b27c2adb6f2e567295433c704", size = 22068, upload-time = "2026-08-31T18:20:03.43Z" },
-]
-
-[[package]]
 name = "agents"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "ag-ui-protocol" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "logfire", extra = ["fastapi", "httpx"] },
     { name = "pydantic-ai-harness", extra = ["skills"] },
-    { name = "pydantic-ai-slim", extra = ["ag-ui", "openai", "spec"] },
+    { name = "pydantic-ai-slim", extra = ["openai", "spec"] },
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
     { name = "uvicorn", extra = ["standard"] },
@@ -40,12 +27,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ag-ui-protocol", specifier = ">=0.1.10" },
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "logfire", extras = ["fastapi", "httpx"], specifier = ">=5.2.0" },
     { name = "pydantic-ai-harness", extras = ["skills"], specifier = ">=0.65.0" },
-    { name = "pydantic-ai-slim", extras = ["ag-ui", "openai", "spec"], specifier = ">=1.0.0" },
+    { name = "pydantic-ai-slim", extras = ["openai", "spec"], specifier = ">=1.0.0" },
     { name = "pydantic-settings", specifier = ">=2.7.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.34.0" },
@@ -892,10 +878,6 @@ wheels = [
 ]
 
 [package.optional-dependencies]
-ag-ui = [
-    { name = "ag-ui-protocol" },
-    { name = "starlette" },
-]
 openai = [
     { name = "openai" },
     { name = "tiktoken" },
