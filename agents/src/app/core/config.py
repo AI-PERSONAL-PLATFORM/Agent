@@ -11,7 +11,6 @@ class Settings(BaseSettings):
         case_sensitive=False, env_file=".env", env_ignore_empty=True, extra="ignore"
     )
 
-    cors_origins: str = ""
     model_provider: Literal["opencode", "ollama"] = "opencode"
     agent_model: str = "gpt-6-luna"
     agent_request_limit: int = 20
@@ -39,10 +38,6 @@ class Settings(BaseSettings):
         has_api_key = bool(self.opencode_api_key)
         has_base_url = bool(self.opencode_base_url)
         return has_api_key and has_base_url
-
-    @property
-    def allowed_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 @lru_cache
