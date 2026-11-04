@@ -35,4 +35,4 @@ jobs:
             exit 1
           fi
       - name: Send a message to the real agent and verify its reply
-        run: mise x -- uv run --env-file agents/.env.example --frozen bash .github/workflows/scripts/test_agents.sh
+        run: mise x -- uv run --env-file .env.example --frozen bash .github/workflows/scripts/test_agents.sh
